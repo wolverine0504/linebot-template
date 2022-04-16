@@ -1,0 +1,5 @@
+[linebot]
+line_bot_api = caLwJjnPGftpSbOcvDnqijJNoAlZyDfWM8PVezJCydxo9eccxuxyAF06lsTAms15cWlROHos/AQsHiJEYs1t0DfjcGwUyAKwOtrN8bZmjzN2qoxt/L/LbGkdDyvNfOyTtjDAXdd/2pFcRz1/YD20HgdB04t89/1O/w1cDnyilFU=
+handler = c35ed2f8a523a7c89b537bae417c219b
+first_message = section=narrate&action=ch1-1
+excel_file = reply_messagesCH1.xlsx

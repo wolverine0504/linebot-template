@@ -3,11 +3,9 @@ from flask import Flask, request, abort
 import pandas as pd
 import os
 import json
-import random
-import hashlib
-import string
 import openpyxl
 from urllib import parse
+import configparser
 
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
@@ -29,9 +27,10 @@ app = Flask(__name__)
 
 #line_bot_api = LineBotApi(os.environ.get('LINE_CHANNEL_ACCESS_TOKEN'))
 #handler = WebhookHandler(os.environ.get('LINE_CHANNEL_SECRET'))
-line_bot_api = LineBotApi(
-    'h1FSu3wWcgB+6eTNYAXPA+vblQLpOGSoSBFW4T7d6kadGRzUHH6uG1NWcATbLjhWoL27+stVrdaX94+bjXJdWme36Upt34BMaZQ42E+flSWGDhHKodGGcIcPdUaSPDKtM5E8g1dGDg5BhpD0VkHZ1QdB04t89/1O/w1cDnyilFU=')
-handler = WebhookHandler('549b46ba8dad9b75950c6c05df709202')
+config = configparser.ConfigParser()
+config.read('config.ini')
+line_bot_api = LineBotApi(config["linebot"]["line_bot_api"])
+handler = WebhookHandler(config["linebot"]["handler"])
 
 
 def getMessageObject(jsonObject):
@@ -61,7 +60,7 @@ def get_reply_messages(data):
     section = querystring_dict['section']
     action = querystring_dict['action']
     reply_table = pd.read_excel(
-        'reply_messages_police.xlsx', engine='openpyxl')
+        config["linebot"]["excel_file"], engine='openpyxl')
     section_row = reply_table[reply_table.section == section]
     action_row = section_row[section_row.action == action]
     return_array = []
@@ -79,7 +78,7 @@ def get_reply_messages(data):
     return return_array
 
 
-@app.route("/", methods=['POST'])
+@app.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
@@ -108,13 +107,13 @@ def handle_message(event):
             event.reply_token, TextSendMessage(text="testing"))
     if msgtxt == "#replay":
         line_bot_api.reply_message(
-            event.reply_token, get_reply_messages("section=police&action=hello_asking"))
+            event.reply_token, get_reply_messages(config['linebot']['first_message']))
 
 
 @handler.add(FollowEvent)
 def handle_follow(event):
     line_bot_api.reply_message(
-        event.reply_token, get_reply_messages("section=police&action=hello_asking"))
+        event.reply_token, get_reply_messages(config['linebot']['first_message']))
 
 
 @handler.add(PostbackEvent)
